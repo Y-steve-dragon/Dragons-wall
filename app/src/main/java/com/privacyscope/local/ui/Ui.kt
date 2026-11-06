@@ -35,8 +35,8 @@ object Ui {
     // C_DIM 原来 0xFF5C7F6C 在 C_CARD 上只有约 2.3:1 —— 小字基本看不清，是用户报的主要问题。
     const val C_BG = 0xFF05070A.toInt()      // 近黑（底）
     const val C_CARD = 0xFF0A1014.toInt()    // 面板
-    const val C_INK = 0xFFE8FFF2.toInt()     // 主文字（比原来再亮一点）
-    const val C_DIM = 0xFF9DBFAC.toInt()     // 次要文字（在 C_CARD 上约 7:1）
+    const val C_INK = 0xFFFFFFFF.toInt()     // 主文字：纯白（v0.9.15 按用户要求统一改白）
+    const val C_DIM = 0xFFD9EAE0.toInt()     // 次要文字：接近白（原来偏灰绿，小字仍不够亮）
     const val C_SEED = 0xFF3BF59A.toInt()    // 主色：荧光绿（更亮，暗底上约 12:1）
     const val C_WARN = 0xFFFF6B5E.toInt()    // 红：风险（提亮，暗底上更易读）
     const val C_AMBER = 0xFFFFC44D.toInt()   // 黄：注意
@@ -123,7 +123,7 @@ object Ui {
 
     /** 段落小标题：`▍ 网络观测` —— 一眼能看出是新的一段 */
     fun section(ctx: Context, text: String): TextView {
-        val t = mono(ctx, "▍" + text, 13f, C_SEED)
+        val t = mono(ctx, "▍" + text, 13f, C_INK)
         t.setTypeface(MONO, Typeface.BOLD)
         t.setPadding(0, dp(ctx, 14), 0, dp(ctx, 6))
         return t
@@ -216,7 +216,7 @@ object Ui {
      */
     fun fold(ctx: Context, label: String, open: Boolean = false, build: (LinearLayout) -> Unit): LinearLayout {
         val box = column(ctx)
-        val head = mono(ctx, (if (open) "▾ " else "▸ ") + label, 12.5f, C_AMBER)
+        val head = mono(ctx, (if (open) "▾ " else "▸ ") + label, 12.5f, C_INK)
         head.setPadding(0, dp(ctx, 8), 0, dp(ctx, 8))
         val body = column(ctx)
         body.setPadding(dp(ctx, 10), 0, 0, dp(ctx, 4))
@@ -248,8 +248,8 @@ object Ui {
         b.textSize = 12f
         b.typeface = MONO
         b.isAllCaps = false
-        b.setTextColor(if (filled) 0xFF04120A.toInt() else C_SEED)
-        b.background = round(if (filled) C_SEED else 0x00000000, dp(ctx, 3), dp(ctx, 1), C_SEED)
+        b.setTextColor(if (filled) 0xFF000000.toInt() else C_INK)
+        b.background = round(if (filled) C_SEED else 0x00000000, dp(ctx, 3), dp(ctx, 1), C_BORDER)
         b.setPadding(dp(ctx, 12), dp(ctx, 8), dp(ctx, 12), dp(ctx, 8))
         b.minHeight = 0
         b.minimumHeight = 0
@@ -303,7 +303,7 @@ object Ui {
     fun paintCheck(ctx: Context, t: TextView, checked: Boolean) {
         if (checked) {
             t.text = "✓"
-            t.setTextColor(0xFF04120A.toInt())
+            t.setTextColor(0xFF000000.toInt())
             t.background = round(C_SEED, dp(ctx, 3))
         } else {
             t.text = ""

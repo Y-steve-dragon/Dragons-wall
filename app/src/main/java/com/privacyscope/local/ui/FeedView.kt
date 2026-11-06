@@ -18,6 +18,7 @@ import com.privacyscope.local.core.Blocker
 import com.privacyscope.local.core.Monitor
 import com.privacyscope.local.core.Shell
 import com.privacyscope.local.core.Store
+import com.privacyscope.local.core.RiskDb
 import com.privacyscope.local.core.TrackerDb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +37,9 @@ import java.util.Locale
  * 3. 等宽单栏，一行一条，不搞卡片；
  * 4. 命中黑名单的行整行标红 —— **只标不拦**，标记不参与任何决策。
  */
+/** 一条事件的判定结果：红 = 本项目会拦下的追踪域名；黄 = 高危域名（恶意/钓鱼），只标记、不拦截。 */
+class Mark(val text: String, val color: Int)
+
 class FeedView(private val act: AppCompatActivity) {
 
     lateinit var root: View
@@ -136,6 +140,10 @@ class FeedView(private val act: AppCompatActivity) {
     /** 拉一次数据库；跟随状态下贴到底 */
     fun reload() {
         scope.launch {
+            try {
+                RiskDb.count(act)   // 首次进「流」页时在 IO 线程把它读进来，免得标黄要等下一轮
+            } catch (_: Throwable) {
+            }
             val list = try {
                 Store(act).recentEvents(400).reversed()   // 数据库给的是最新在前 → 翻成尾巴式
             } catch (t: Throwable) {
@@ -143,7 +151,7 @@ class FeedView(private val act: AppCompatActivity) {
             }
             withContext(Dispatchers.Main) {
                 adapter.submit(list)
-                val risk = list.count { adapter.riskLabel(it) != null }
+                val risk = list.count { adapter.riskOf(it) != null }
                 status.text = (if (Monitor.running) "● LIVE" else "○ IDLE") +
                     " · ${list.size} 条 · 风险 $risk 条 · 库上限 2000"
                 status.setTextColor(if (Monitor.running) Ui.C_SEED else Ui.C_DIM)
@@ -190,15 +198,19 @@ class FeedView(private val act: AppCompatActivity) {
         }
 
         /** 命中黑名单就返回一段说明；不命中返回 null（说明只是"看见"，不是"拦了"） */
-        fun riskLabel(e: Store.Event): String? {
+        /** 红 = 本项目会拦下的追踪域名；黄 = 高危域名（恶意/钓鱼），只标记、不拦截。 */
+        fun riskOf(e: Store.Event): Mark? {
             if (e.kind != "网络") return null
             val host = Regex("查域名\\s+([^\\s（(]+)").find(e.detail)?.groupValues?.get(1) ?: return null
             if (Blocker.isAppOut(act, e.pkg)) return null
             val h = host.lowercase().trimEnd('.')
             if (Blocker.allowDomains(act).any { h == it || h.endsWith(".$it") }) return null
-            if (Blocker.custom(act).any { h == it || h.endsWith(".$it") }) return "自定义黑名单"
-            val sdk = TrackerDb.byDomain(h) ?: return null
-            return sdk.name + " · " + TrackerDb.categoryName(sdk.category)
+            if (Blocker.custom(act).any { h == it || h.endsWith(".$it") }) return Mark("自定义黑名单", Ui.C_WARN)
+            val sdk = TrackerDb.byDomain(h)
+            if (sdk != null) return Mark(sdk.name + " · " + TrackerDb.categoryName(sdk.category), Ui.C_WARN)
+            val high = RiskDb.hit(act, h)
+            if (high != null) return Mark("高危 · " + high, Ui.C_AMBER)
+            return null
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
@@ -215,28 +227,35 @@ class FeedView(private val act: AppCompatActivity) {
 
         override fun onBindViewHolder(holder: VH, position: Int) {
             val e = list[position]
-            val risk = riskLabel(e)
+            val mark = riskOf(e)
             val sb = SpannableStringBuilder()
             val t0 = fmt.format(Date(e.ts))
             sb.append(t0)
             sb.setSpan(ForegroundColorSpan(Ui.C_DIM), 0, sb.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            val head = (if (risk != null) " !" else "  ") + e.pkg + " · " + e.kind
+            val head = (when (mark?.color) { Ui.C_WARN -> " !"; Ui.C_AMBER -> " ▲"; else -> "  " }) +
+                e.pkg + " · " + e.kind
             val hStart = sb.length
             sb.append(head)
             sb.setSpan(
-                ForegroundColorSpan(if (risk != null) Ui.C_WARN else Ui.C_INK),
+                ForegroundColorSpan(mark?.color ?: Ui.C_INK),
                 hStart, sb.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             sb.append("\n   ")
             val dStart = sb.length
             sb.append(e.detail)
-            if (risk != null) sb.append("  [命中 " + risk + "]")
+            if (mark != null) sb.append(if (mark.color == Ui.C_AMBER) "  [高危 " + mark.text + "]" else "  [命中 " + mark.text + "]")
             sb.setSpan(
-                ForegroundColorSpan(if (risk != null) Ui.C_WARN else Ui.C_DIM),
+                ForegroundColorSpan(mark?.color ?: Ui.C_DIM),
                 dStart, sb.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             holder.t.text = sb
-            holder.t.setBackgroundColor(if (risk != null) 0x14FF3B30 else 0x00000000)
+            holder.t.setBackgroundColor(
+                when (mark?.color) {
+                    Ui.C_WARN -> 0x14FF3B30
+                    Ui.C_AMBER -> 0x1CFFC44D
+                    else -> 0x00000000
+                }
+            )
         }
 
         override fun getItemCount(): Int = list.size

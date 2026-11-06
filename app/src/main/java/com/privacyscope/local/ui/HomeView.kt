@@ -64,20 +64,17 @@ class HomeView(private val act: AppCompatActivity) {
         host.addView(RiskCard.build(act))
 
         val about = Ui.card(act)
-        about.addView(Ui.section(act, "它会做什么 / 不做什么"))
+        about.addView(Ui.section(act, "已经有的能力"))
         about.addView(
             Ui.foldText(
-                act, "会做的事（点开）",
-                "列清单（谁装了什么、要了什么权限、打包了哪些 SDK）、" +
-                    "看网络去向（DNS/SNI，只解析不拦截）、按 App 关采集、" +
-                    "给勾选的 App 打保护、把这一切记成时间线并导出报告。"
-            )
-        )
-        about.addView(
-            Ui.foldText(
-                act, "不会做的事（点开）",
-                "改 IMEI、伪造设备指纹、解密别人的 HTTPS、把数据传到任何服务器。" +
-                    "这些要么需要 root/厂商签名，要么属于绕过而不是保护。"
+                act, "这台手机上它已经能做的事（点开）",
+                "① 列清单：谁装了什么、要了哪些权限、打包了哪些 SDK、风险分多少；\n" +
+                    "② 改能力：不装额外软件，靠无线调试通道关掉某个 App 的设备标识 / 后台 / 剪贴板 / 相机 / 定位；\n" +
+                    "③ 看网络：每个域名是谁在查、命中哪家追踪库，命中即可一键沉洞拦截；\n" +
+                    "④ 记时间线：前台切换、能力变化、拦截记录全部落在本机，可导出报告；\n" +
+                    "⑤ 一键体检：21 个维度只读检查（开发者选项、无障碍、输入法、加密、代理、WebView 等）；\n" +
+                    "⑥ 文件观测：受限 / 全盘两种模式，看最近 24 小时新增了哪些文件；\n" +
+                    "⑦ 快照回滚：改之前存一份，改坏了整体恢复。"
             )
         )
         host.addView(about)

@@ -104,7 +104,27 @@ class AppsView(private val act: AppCompatActivity) {
         val pr = Ui.row(act)
         presetSpinner = Spinner(act)
         val names = Ops.PRESETS.map { it.label }
-        presetSpinner.adapter = ArrayAdapter(act, android.R.layout.simple_spinner_dropdown_item, names)
+        // 收起时是深色卡片上的白字；展开的列表是浅色底板，所以那一层要黑字。
+        // 系统 ArrayAdapter 这两层共用一个主题，只能就地改字色。
+        val padapter = object : ArrayAdapter<String>(act, android.R.layout.simple_spinner_item, names) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val v = super.getView(position, convertView, parent) as TextView
+                v.setTextColor(0xFFFFFFFF.toInt())
+                v.textSize = 12.5f
+                v.setPadding(Ui.dp(act, 8), Ui.dp(act, 7), Ui.dp(act, 4), Ui.dp(act, 7))
+                return v
+            }
+
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val v = super.getDropDownView(position, convertView, parent) as TextView
+                v.setTextColor(0xFF000000.toInt())
+                v.textSize = 12.5f
+                v.setPadding(Ui.dp(act, 12), Ui.dp(act, 11), Ui.dp(act, 12), Ui.dp(act, 11))
+                return v
+            }
+        }
+        padapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        presetSpinner.adapter = padapter
         presetSpinner.layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
         pr.addView(presetSpinner)
         pr.addView(Ui.button(act, "应用") { applyPreset() })
@@ -284,7 +304,7 @@ class AppsView(private val act: AppCompatActivity) {
     /** 失败不能只说「失败 1 项」——要把命令、输出、回读原样摊开，否则没法排错。 */
     private fun showFailure(head: String, trace: String) {
         val box = android.widget.ScrollView(act)
-        val tv = Ui.mono(act, head + "\n\n" + trace.ifBlank { "（没有记录到任何对话）" }, 11f, Ui.C_INK)
+        val tv = Ui.mono(act, head + "\n\n" + trace.ifBlank { "（没有记录到任何对话）" }, 11f, 0xFF000000.toInt())
         tv.setTextIsSelectable(true)
         val pad = Ui.dp(act, 14)
         tv.setPadding(pad, pad, pad, pad)

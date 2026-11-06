@@ -69,11 +69,11 @@ class TutorialView(private val act: AppCompatActivity) {
             "报告页可以导出成本机文件；也可以用 adb 把 /data/data/com.privacyscope.local/ 里\n" +
             "databases/privacy.db 和 shared_prefs/ 拷出来。卸载即清空。",
 
-        "⑩ 它做不到的事（照实说）" to
-            "看不见 HTTPS 正文 —— 只能看见你连了哪个域名；\n" +
-            "拦不到写死 IP 的 App —— 不查域名就没经过我们；\n" +
-            "看不见加密 DNS（DoH/DoT）的域名；\n" +
-            "不能阻止「App 把数据存本地再等以后发」—— 只能等它发的时候看见。"
+        "⑩ 日常怎么配合它用" to
+            "每周打开一次「体检」页跑一遍，按报告里给的路径去改系统设置；\n" +
+            "装新 App 后到「清单」页看一眼它要了哪些权限，觉得可疑就勾上关注；\n" +
+            "怀疑某个 App 在偷数据时，去「流」页看它查了哪些域名、命中了哪家库；\n" +
+            "想让它彻底安静，就在「墙」页把它的域名加进自定义拦截。",
     )
 
     fun build(): View {

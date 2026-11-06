@@ -15,3 +15,14 @@
 
 > Kadb 2.1.2 及以上要求 `compileSdk 37`，本工程使用 **2.1.1**（`minCompileSdk=36`）。
 > 升级 Kadb 前必须同步升级 compileSdk，否则构建在 `checkDebugAarMetadata` 阶段失败。
+
+## 数据（高危域名库）
+
+| 来源 | 许可 | 用途 | 落地位置 |
+|---|---|---|---|
+| [malware-filter / urlhaus-filter](https://gitlab.com/malware-filter/urlhaus-filter)（数据源自 [abuse.ch URLhaus](https://urlhaus.abuse.ch/)） | MIT（项目）/ **CC0 1.0**（URLhaus 数据） | 恶意软件分发域名 | `app/src/main/res/raw/risk_domains.txt`（类别 1） |
+| [malware-filter / phishing-filter](https://gitlab.com/malware-filter/phishing-filter) | MIT | 钓鱼站点域名 | 同上（类别 2） |
+
+- 只做**离线快照**：生成脚本 `kb/_build-riskdb.mjs`，跑一次下载一次，App 运行时**不联网更新**。
+- 命中后**只标黄**，不拦截、不外传、不上报（本 App 没有服务端）。
+- 数据条数以文件头注释为准（约 2.3 万条）。

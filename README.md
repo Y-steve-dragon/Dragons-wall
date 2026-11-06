@@ -35,19 +35,25 @@
 | JDK | 17 |
 | Android SDK | platform 36 / build-tools 36.0.0 |
 | Gradle | 8.14.3 |
-| AGP / Kotlin | 8.13.0 / 2.2.20 |
+| AGP / Kotlin | 8.13.2 / 2.3.20 |
 | minSdk / targetSdk | 24 / 36 |
+
+![Android CI](https://github.com/<你的用户名>/<仓库名>/actions/workflows/android.yml/badge.svg)
 
 ```bash
 # local.properties（不要提交）
 sdk.dir=D:/path/to/android-sdk
 
-# 构建
-gradle -p . assembleDebug
-# 产物：app/build/outputs/apk/debug/app-debug.apk
+# 构建 + 测试（自带 Gradle Wrapper，不需要本机装 Gradle）
+./gradlew testDebugUnitTest    # 21 条纯逻辑单测，不需要真机/模拟器
+./gradlew assembleDebug        # 产物：app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleRelease      # 需要 keys/ + keystore.properties（见 docs/签名与发布）
 ```
 
-首次构建需要联网下载依赖（AGP、Compose、Kadb）。之后可加 `--offline`。
+首次构建需要联网下载依赖（AGP、Kotlin、Kadb）。之后可加 `--offline`。
+
+> CI（`.github/workflows/android.yml`）只做两件事：**编译通过** + **单测通过**。
+> 它不产出签名包——签名是人的决定，不该由 CI 代劳。
 
 ## 权限说明（每一项都对应一个功能，没有多余项）
 
@@ -60,7 +66,8 @@ gradle -p . assembleDebug
 | `POST_NOTIFICATIONS` | 显示那条常驻通知 |
 | `MANAGE_EXTERNAL_STORAGE` | 全盘文件观测模式（可不开，默认受限模式） |
 | `READ_MEDIA_*` | 受限模式下看相册/音频/视频目录的变化 |
-| `moe.shizuku.manager.permission.API_V23` | 若用户装了 Shizuku，用它取得 shell 身份 |
+
+> 没有任何“后台静默申请”的权限：以上每一项都对应界面上一个按钮，且用户不点就不生效。
 
 ## 隐私声明
 
@@ -72,11 +79,13 @@ gradle -p . assembleDebug
 
 ```
 app/src/main/java/com/privacyscope/local/
-├── core/      AppOps、Bypass、FileWatch、Ops(快照)、PkgRepo、Profiles、Shell、Store、TrackerDb、Scanner、Adb、CaptureVpnService
-├── vpn/       VpnService、DNS 解析与转发、连接归因
+├── core/      AppOps、Bypass、Blocker、FileWatch、Ops(预设/快照)、PkgRepo、RiskScan、RiskDb、
+│              Shell、Adb、Store、TrackerDb、Scanner、Pure(纯逻辑)、Quiet(异常记录)
+├── vpn/       VpnService、DNS 解析/转发/沉洞、连接归因
 └── ui/        MainActivity + 七个视图 + 组件库（无 XML）
+app/src/test/  21 条 JVM 单测（只测 core/Pure.kt）
 解包工具/      apk-explain.mjs —— 给任意 APK 出“每个文件是干什么的”中文说明
-路线②-教程/    00~07 八篇零基础教程
+路线②-教程/    00~09 零基础教程
 docs/          设计文档与能力边界
 ```
 

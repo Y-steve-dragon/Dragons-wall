@@ -27,3 +27,6 @@ tmp/
 keys/
 *.jks
 keystore.properties
+
+# 补丁工具的临时备份目录
+.dsh-patch-backup/

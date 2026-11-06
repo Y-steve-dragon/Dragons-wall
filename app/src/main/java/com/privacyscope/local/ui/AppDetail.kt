@@ -402,7 +402,7 @@ object AppDetail {
      */
     private fun showTrace(act: Activity, head: String, trace: String) {
         val box = android.widget.ScrollView(act)
-        val tv = Ui.mono(act, head + "\n\n" + trace.ifBlank { "（没有记录到任何对话）" }, 10.5f, Ui.C_INK)
+        val tv = Ui.mono(act, head + "\n\n" + trace.ifBlank { "（没有记录到任何对话）" }, 10.5f, 0xFF000000.toInt())
         tv.setTextIsSelectable(true)
         val pad = Ui.dp(act, 14)
         tv.setPadding(pad, pad, pad, pad)

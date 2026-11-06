@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.privacyscope.local.core.Adb
+import com.privacyscope.local.core.RiskDb
 import com.privacyscope.local.core.Quiet
 import com.privacyscope.local.core.Shell
 import com.privacyscope.local.ui.AppsView
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Adb.attach(this)
+        RiskDb.preload(this)   // 23k 条高危域名，后台预热，别卡首屏
         Quiet.attach(this)
         installCrashLogger()
         Shell.detect()

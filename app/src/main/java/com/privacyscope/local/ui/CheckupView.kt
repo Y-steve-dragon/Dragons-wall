@@ -41,8 +41,6 @@ class CheckupView(private val act: Activity) {
                 .show()
         })
 
-        col.addView(Ui.note(act, "为什么有「无法检测」", "厂商云账号同步状态、别家 VPN 是否在跑、某个 App 是不是侧载的 —— 这三类安卓没给第三方接口。报告里保留这些维度并写明原因，是为了让你知道「还有这种风险」，而不是假装查过了。"))
-        col.addView(Ui.note(act, "体检不等于加固", "它负责「看见」，改不改是你的事：该关的开发者选项、该撤的无障碍、该换的输入法，报告里每条都写了路径。本 App 不会替你关 —— 关错了后果由你承担，这种事不能自动化。"))
 
         sc.addView(col)
         return sc

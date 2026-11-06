@@ -26,8 +26,8 @@ android {
         applicationId = "com.privacyscope.local"
         minSdk = 24
         targetSdk = 36
-        versionCode = 26
-        versionName = "0.9.14"
+        versionCode = 28
+        versionName = "0.9.16"
     }
 
     signingConfigs {
@@ -94,6 +94,7 @@ kotlin {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
+
 
 
 
