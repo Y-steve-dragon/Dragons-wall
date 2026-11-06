@@ -1,7 +1,22 @@
-﻿plugins {
+import java.util.Properties
+
+plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+/**
+ * release 签名配置。
+ *
+ * 为什么这么写：私钥和密码都放在 `keys/`（已在 .gitignore 里），工程里不出现任何明文口令。
+ * 文件不存在时（别人克隆你的仓库）不会报错，只是打出来的 release 包没有签名 —— 这是刻意的：
+ * 开源仓库里不能有「因为缺一个文件就整个构建失败」的硬依赖。
+ */
+val keyProps = Properties().apply {
+    val f = rootProject.file("keys/keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val hasReleaseKey = keyProps.getProperty("storeFile") != null
 
 android {
     namespace = "com.privacyscope.local"
@@ -15,10 +30,24 @@ android {
         versionName = "0.9.14"
     }
 
+    signingConfigs {
+        if (hasReleaseKey) {
+            create("release") {
+                storeFile = rootProject.file(keyProps.getProperty("storeFile"))
+                storePassword = keyProps.getProperty("storePassword")
+                keyAlias = keyProps.getProperty("keyAlias")
+                keyPassword = keyProps.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (hasReleaseKey) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
         debug {
             isMinifyEnabled = false

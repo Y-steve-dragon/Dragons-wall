@@ -22,3 +22,8 @@ local.properties.bak
 *.log
 *.hprof
 tmp/
+
+# release 签名（私钥，绝不提交）
+keys/
+*.jks
+keystore.properties
