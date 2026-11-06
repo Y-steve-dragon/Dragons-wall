@@ -2,6 +2,7 @@
 
 **看得见 App 在拿什么、发了哪些请求，并且能在不 root 的前提下关掉一部分。全部在本机完成。**
 
+[![Android CI](https://github.com/Y-steve-dragon/Dragons-wall/actions/workflows/android.yml/badge.svg)](https://github.com/Y-steve-dragon/Dragons-wall/actions/workflows/android.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Android](https://img.shields.io/badge/Android-7.0%2B%20(API%2024)-3ddc84.svg)](#环境与构建)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-7f52ff.svg)](#环境与构建)
