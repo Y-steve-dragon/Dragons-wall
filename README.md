@@ -14,6 +14,16 @@
 
 > 名字来历：作者宿舍外号“阿龙”，“墙”指防火墙——把不该出去的东西挡在本地。
 
+## 界面
+
+| 墙 · 本机能力 | 流 · DNS 归因 |
+|---|---|
+| <img src="docs/screenshots/01-wall.jpg" width="320"> | <img src="docs/screenshots/02-stream.jpg" width="320"> |
+
+| 体检 · 21 维度报告 | VPN · 隧道状态 |
+|---|---|
+| <img src="docs/screenshots/03-checkup.jpg" width="320"> | <img src="docs/screenshots/04-vpn.jpg" width="320"> |
+
 ## 三十秒上手
 
 1. 去 [Releases](https://github.com/Y-steve-dragon/Dragons-wall/releases/latest) 下载 APK 安装（允许「安装未知来源应用」）。
