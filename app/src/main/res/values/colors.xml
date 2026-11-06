@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 主色（v0.9.9 提对比度：0x37F08C → 0x3BF59A，见 ui/Ui.kt 顶部常量） -->
+    <color name="seed">#3BF59A</color>
+    <color name="ink">#E8FFF2</color>
+    <color name="paper">#05070A</color>
+    <!-- 自适应图标底色：和 CRT 图标的外底一致，避免遮罩边缘露白 -->
+    <color name="ic_launcher_bg">#061410</color>
+</resources>

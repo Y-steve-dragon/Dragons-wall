@@ -1,0 +1,24 @@
+# 构建产物
+build/
+app/build/
+*.apk
+*.aab
+*.idsig
+
+# 本机配置（含绝对路径，绝不能提交）
+local.properties
+
+# Gradle
+.gradle/
+gradle-app.setting
+local.properties.bak
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# 日志与临时
+*.log
+*.hprof
+tmp/

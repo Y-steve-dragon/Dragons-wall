@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  自适应图标（Android 8.0+）：
+  背景用纯色，前景是 drawable-xxxhdpi 里那张手绘的 CRT 显示器（内容缩在中间 66% 安全区，
+  所以被厂商裁成圆形/方形/水滴形都不会切到屏幕）。
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_bg" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>
