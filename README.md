@@ -1,5 +1,7 @@
 # 阿龙的墙 · DragonsWall
 
+**简体中文 | [English](README.en.md)**
+
 **看得见 App 在拿什么、发了哪些请求，并且能在不 root 的前提下关掉一部分。全部在本机完成。**
 
 [![Android CI](https://github.com/Y-steve-dragon/Dragons-wall/actions/workflows/android.yml/badge.svg)](https://github.com/Y-steve-dragon/Dragons-wall/actions/workflows/android.yml)
