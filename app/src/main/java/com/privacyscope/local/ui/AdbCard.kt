@@ -33,6 +33,56 @@ object AdbCard {
         val status = Ui.mono(act, Adb.statusLine(), 12f, Ui.C_AMBER)
         card.addView(status)
 
+        // 暴露计时（v0.9.17）：无线调试开着 = adbd 对外服务着，应该是一个短窗口，不是常开状态
+        val (exposureText, exposureWarn) = Adb.exposureLine()
+        val exposure = Ui.mono(act, "▸ 暴露时长：" + exposureText, 11.5f, if (exposureWarn) Ui.C_WARN else Ui.C_DIM)
+        card.addView(exposure)
+
+        // 当前网络性质（v0.9.17）：决定「这个通道此刻暴露在什么人面前」
+        val net = com.privacyscope.local.core.NetAudit.inspect(act)
+        val netLine = Ui.mono(
+            act,
+            "▸ 当前网络：" + net.transport + " " + net.detail,
+            11.5f,
+            if (net.risky) Ui.C_WARN else Ui.C_DIM
+        )
+        card.addView(netLine)
+        card.addView(Ui.mono(act, "   " + net.advice, 11f, if (net.risky) Ui.C_AMBER else Ui.C_DIM))
+
+        card.addView(
+            Ui.note(
+                act,
+                "为什么显示计时和网络",
+                "「无线调试」不是普通开关：打开后手机在本网络上开了一个 adb 服务（uid 2000 的 shell），" +
+                    "同网设备多了一个可探测的目标。所以：\n" +
+                    "① 计时：超过 10 分钟就提醒你断开 —— 它应该是一个几十秒的窗口，而不是常开状态；\n" +
+                    "② 网络：开放网络（无密码）风险最高，公共热点次之，家庭加密网最低；\n" +
+                    "③ 纯移动数据下多数机型的无线调试起不来，此时「看」类功能照常，改权限请回 Wi-Fi。\n" +
+                    "本 App 只做提示与计时，不会自动改系统设置，也不扫描同网设备。"
+            )
+        )
+
+        // 计时每 30 秒自己刷新一次；视图离开窗口就停，不在后台空转
+        val h = android.os.Handler(android.os.Looper.getMainLooper())
+        val tick = object : Runnable {
+            override fun run() {
+                val (t, warn) = Adb.exposureLine()
+                exposure.text = "▸ 暴露时长：" + t
+                exposure.setTextColor(if (warn) Ui.C_WARN else Ui.C_DIM)
+                h.postDelayed(this, 30_000L)
+            }
+        }
+        card.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(v: View) {
+                h.removeCallbacks(tick)
+                h.post(tick)
+            }
+
+            override fun onViewDetachedFromWindow(v: View) {
+                h.removeCallbacks(tick)
+            }
+        })
+
         // 最容易卡住的一步：主界面上看不到 6 位码，必须点「使用配对码配对设备」才会弹出来
         card.addView(
             Ui.mono(

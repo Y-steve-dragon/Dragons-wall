@@ -53,6 +53,27 @@
 4. **Not a packet-level firewall** — blocking happens at the DNS layer. An app connecting to a hard-coded IP will not be blocked, and there is no "cut this app off completely" mode (that needs a user-space TCP/IP stack).
 5. **No GPL code** — every third-party dependency is Apache-2.0, MIT or BSD.
 
+## Known limitations (including the security boundary of the adb channel)
+
+**Read this section first.** Item 1 in particular is an inherent cost of this approach, not a bug.
+
+### The wireless-debugging channel
+
+1. **It exposes the phone's `adbd` (`uid 2000` shell) on the current network.** With wireless debugging on, every device on the same Wi-Fi gains a reachable target it can probe and try to pair with. This channel is meant to be a window of tens of seconds, **not a permanently open door**.
+   - Since v0.9.17 the UI shows **how long the channel has been connected** (turns red past 10 minutes) and **what kind of network you are on** (open network / public hotspot / encrypted / cellular-only);
+   - The app deliberately **does not** flip the system's wireless-debugging switch for you. Writing system settings is out of scope; you close it yourself.
+2. **Unpaired devices cannot connect.** Android 11+ requires pairing first (SPAKE2 plus the 6-digit code shown on screen); unpaired connections are rejected. The pairing private key lives in the app's private directory (`filesDir/adbkey/adbkey.pem`) and never leaves the device.
+3. **Usually unavailable on cellular only.** Most devices require WLAN for wireless debugging, so the channel drops on mobile data. All **read-only** features (app list, live DNS stream, checkup, report) keep working; only "change another app's capabilities" needs Wi-Fi.
+4. **Reconnect after reboot** — most devices turn wireless debugging off. The pairing key survives, so you usually do not need to pair again, but the connection port changes every time.
+5. **Capabilities differ by OS version.** Not every AppOps name exists on every Android release (e.g. `GET_INSTALLED_APPS` is gone on Android 16). The UI then says "this system does not expose this capability" rather than pretending it failed.
+
+### Everything else
+
+- **Blocking is DNS-layer only** — apps using hard-coded IPs or their own DoH/DoT resolver are not blocked.
+- **No per-app kill switch** — that needs a user-space TCP/IP stack, which this project does not implement.
+- **No root support** — no root-only capability is provided or read.
+
+
 ## Requirements & build
 
 | Item | Version |

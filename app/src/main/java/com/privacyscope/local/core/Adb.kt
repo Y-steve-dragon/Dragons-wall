@@ -48,6 +48,16 @@ object Adb {
     @Volatile
     private var linked = false
 
+    /**
+     * 连上的时刻（毫秒，wall clock）。用来算「这个对外服务已经开了多久」。
+     *
+     * 为什么记这个：无线调试开着 = 手机上的 adbd 对外服务着。它不是一个可以一直开着的开关，
+     * 而应该是一个「用几分钟就关掉」的窗口。界面上要把这个窗口的时长显示给人看。
+     * 进程被杀后这个时间会丢，此时返回 -1（界面显示「计时不可用」而不是瞎猜）。
+     */
+    @Volatile
+    private var linkedAtMs = 0L
+
     /** 上次的连接目标（只存本机回环地址与端口，不存任何凭据） */
     var host: String = "127.0.0.1"
         private set
@@ -155,6 +165,7 @@ object Adb {
             if (r.isSuccess) {
                 kadb = r.getOrThrow()
                 linked = true
+                linkedAtMs = System.currentTimeMillis()
                 Shell.markConnected(true)
                 host = h
                 connPort = port
@@ -201,9 +212,37 @@ object Adb {
 
     private fun close() {
         linked = false
+        linkedAtMs = 0L
         Shell.markConnected(false)
         runCatching { kadb?.close() }
         kadb = null
+    }
+
+    /**
+     * 这条通道已经连了多久（分钟）。未连接或计时丢失返回 -1。
+     * 纯内存计算，主线程可直呼。
+     */
+    fun connectedMinutes(): Int {
+        if (!isConnected() || linkedAtMs <= 0L) return -1
+        val d = System.currentTimeMillis() - linkedAtMs
+        if (d < 0) return 0
+        return (d / 60000L).toInt()
+    }
+
+    /**
+     * 暴露窗口的提示行。超过 [warnAfterMin] 分钟就建议关掉。
+     * @return Pair(文案, 是否该用红字)
+     */
+    fun exposureLine(warnAfterMin: Int = 10): Pair<String, Boolean> {
+        if (!isConnected()) return Pair("未连接，没有对外暴露", false)
+        val m = connectedMinutes()
+        if (m < 0) return Pair("已连接（本次计时不可用：进程重启过）", true)
+        val warn = m >= warnAfterMin
+        val text = if (warn)
+            "已连接 $m 分钟 · 超过 $warnAfterMin 分钟了，建议现在断开"
+        else
+            "已连接 $m 分钟 · 建议 $warnAfterMin 分钟内用完就断开"
+        return Pair(text, warn)
     }
 
     /**
